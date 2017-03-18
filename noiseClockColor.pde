@@ -11,8 +11,8 @@ float transWidth = 0.01;
 float transStart2 = 0.45;
 float transWidth2 = 0.01;
 
-float radTransStart = 0.2;
-float radTransWidth = 0.1;
+float radTransStart = 0.18;
+float radTransWidth = 0.15;
 
 float ah = 0.007;
 float as = 0.055;
@@ -88,7 +88,7 @@ void setup() {
       float r = v.mag();
       px[x+y*width/2] = r*cos(a);
       py[x+y*width/2] = r*sin(a);
-      if( r < radTransStart*height ) {
+      if( r < radTransStart*yRes ) {
         pf[x+y*width/2] = 0;
       } else if  (r >= (radTransStart)*yRes && r < (radTransStart+radTransWidth)*yRes ) {
         pf[x+y*width/2] = (r-(radTransStart*yRes))/(radTransWidth*yRes);
@@ -115,8 +115,7 @@ void draw() {
       float x2 = px[x+y*width/2];
       float y2 = py[x+y*width/2];
 
-      float f = noise( ag*af*(30*xRes + x2), ag*af*(30*yRes + y2), tf*t ) ;
-      f *= pf[x+y*width/2];
+      float f = noise( ag*af*(30*xRes + x2), ag*af*(30*yRes + y2), tf*t ) * pf[x+y*width/2] ;
       color c;
       if ( f > transStart && f < transEnd || f > transStart2 && f < transEnd2 ) {
         c = lerpColor( P[x+y*width/2], color(255, 255, 255), alpha );
