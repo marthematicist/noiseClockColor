@@ -11,7 +11,10 @@ float transWidth = 0.01;
 float transStart2 = 0.45;
 float transWidth2 = 0.01;
 
-float ah = 0.005;
+float radTransStart = 0.2;
+float radTransWidth = 0.1;
+
+float ah = 0.007;
 float as = 0.055;
 float ab = 0.055;
 float af = 0.012;
@@ -30,16 +33,19 @@ int w = 1;
 
 float[] px;
 float[] py;
+float[] pf;
+float[] pa;
 
 color[] P;
 
 float cr = 4;
-float hourWidth = 0.025;
-float hourLength = 0.35;
-float minuteWidth = 0.02;
-float minuteLength = 0.55;
+float hourWidth = 0.01;
+float hourLength = 0.2;
+float minuteWidth = 0.01;
+float minuteLength = 0.25;
 float secondWidth = 0.01;
 float secondLength = 0.57;
+float backEnd = 0.04;
 
 int startTime;
 int startSeconds;
@@ -68,6 +74,8 @@ void setup() {
   
   px = new float[(width/2)*(height/2)];
   py = new float[(width/2)*(height/2)];
+  pf = new float[(width/2)*(height/2)];
+  pa = new float[(width/2)*(height/2)];
   for ( int x = 0; x < width/2; x++ ) {
     for ( int y = 0; y < height/2; y++ ) {
       float x2 = float(x) + 0.5;
@@ -80,6 +88,19 @@ void setup() {
       float r = v.mag();
       px[x+y*width/2] = r*cos(a);
       py[x+y*width/2] = r*sin(a);
+      if( r < radTransStart*height ) {
+        pf[x+y*width/2] = 0;
+      } else if  (r >= (radTransStart)*yRes && r < (radTransStart+radTransWidth)*yRes ) {
+        pf[x+y*width/2] = (r-(radTransStart*yRes))/(radTransWidth*yRes);
+      } else {
+        pf[x+y*width/2] = 1;
+      }
+      if( r < 1.1*minuteLength*yRes ) {
+        pa[x+y*width/2] = 0.05;
+      } else {
+        pa[x+y*width/2] = 1;
+      }
+      
     }
   }
 }
@@ -95,6 +116,7 @@ void draw() {
       float y2 = py[x+y*width/2];
 
       float f = noise( ag*af*(30*xRes + x2), ag*af*(30*yRes + y2), tf*t ) ;
+      f *= pf[x+y*width/2];
       color c;
       if ( f > transStart && f < transEnd || f > transStart2 && f < transEnd2 ) {
         c = lerpColor( P[x+y*width/2], color(255, 255, 255), alpha );
@@ -105,7 +127,7 @@ void draw() {
         float b = lerp( minB , maxB , (f-transEnd)/(1-transEnd));
         c = lerpColor( P[x+y*width/2], hsbColor(h*360, 1, b), alpha );
       } else {
-        c = lerpColor( P[x+y*width/2], color(0, 0, 0), alpha );
+        c = lerpColor( P[x+y*width/2], color(0, 0, 0 , pa[x+y*width/2]*255), alpha );
       }
       P[x+y*width/2] = c;
       pixels[ (width/2+x) + (height/2+y)*width ] = c;
@@ -124,29 +146,32 @@ void draw() {
   
   // clock stuff
   float secAng = TWO_PI * float(second())/60;
-  float minAng = TWO_PI * float( minute() )/60;
-  float hourAng = TWO_PI * float( hour()%12 )/12;
+  float minAng = TWO_PI * (float(minute())+float(second())/60)/60;
+  float hourAng = TWO_PI * (float(hour()%12)+float(minute())/60)/12;
   translate( 0.5*xRes , 0.5*yRes );
-  stroke(255);
+  stroke( 255 , 255 , 255 , 20 );
   fill(0);
-  //fill( hsbColor((frameCount*tc*tA + centerH)%1*360, 0.5, 0.5) );
-  ellipse(0.5*xRes,0.5*yRes,0.05*yRes,0.05*yRes);
-  strokeWeight(2);
+  float h = (frameCount*tc*tA + centerH + widthH*(-0.5+noise( 0.1*th*t ) ) )%1;
+  color c = hsbColor( h*360 , 0.5, 0.5) ;
+  
+  strokeWeight(0.85);
   float cr = 4;
+  fill( red(c),green(c),blue(c),225 );
+  ellipse(0,0,0.03*yRes,0.03*yRes);
+  fill( red(c),green(c),blue(c),60 );
   pushMatrix();
   rotate( PI+minAng );
-  rect( -0.5*minuteWidth*yRes , -0.15*minuteLength*yRes , minuteWidth*yRes , minuteLength*yRes , cr , cr , cr , cr );
+  rect( -0.5*minuteWidth*yRes , -backEnd*yRes , minuteWidth*yRes , minuteLength*yRes , cr , cr , cr , cr );
   popMatrix();
+  h = (frameCount*tc*tA + centerH + widthH*(-0.5+noise( -0.1*th*t ) ) )%1;
+  c = hsbColor( h*360 , 0.5, 0.5) ;
+  fill( red(c),green(c),blue(c),60 );
   pushMatrix();
   rotate( PI+hourAng );
-  rect( -0.5*hourWidth*yRes , -0.15*hourLength*yRes , hourWidth*yRes , hourLength*yRes , cr , cr , cr , cr );
+  rect( -0.5*hourWidth*yRes , -backEnd*yRes , hourWidth*yRes , hourLength*yRes , cr , cr , cr , cr );
   popMatrix();
-  pushMatrix();
-  rotate( PI+secAng );
-  strokeWeight(1);
-  rect( -0.5*secondWidth*yRes , -0.15*secondLength*yRes , secondWidth*yRes , secondLength*yRes , cr , cr , cr , cr );
-  popMatrix();
-  ellipse(0,0,0.03*yRes,0.03*yRes);
+  noStroke();
+  
 
   if( frameCount%25 == 0 ) {
     println(frameRate);
