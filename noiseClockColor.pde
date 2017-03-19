@@ -114,6 +114,7 @@ void draw() {
       color c;
       if ( f > transStart && f < transEnd || f > transStart2 && f < transEnd2 ) {
         c = lerpColor( P[x+y*width/2], color(255, 255, 255), alpha );
+        pa[x+y*width/2] = 0;
       } else if ( f >= transStart+transWidth && f < transStart2 ) {
         float h = (frameCount*tc*tA + centerH + widthH*(-0.5+noise( ag*ah*(0*xRes + x2), ag*ah*y2, th*t ) ) )%1;
         //float s = lerp( minS, maxS, noise( ag*as*(10*xRes + x2), ag*as*(10*yRes + y2), ts*t ) );
@@ -122,7 +123,7 @@ void draw() {
         c = lerpColor( P[x+y*width/2], hsbColor(h*360, 1, b), alpha );
         pa[x+y*width/2] = 0;
       } else {
-        if ( pa[x+y*width/2] < 6 ) {
+        if ( pa[x+y*width/2] < 8 ) {
           c = lerpColor( P[x+y*width/2], color(0, 0, 0), alpha );
           pa[x+y*width/2]++;
         } else { 
