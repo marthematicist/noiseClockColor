@@ -5,7 +5,7 @@ float minS = 0.0;
 float maxS = 1.0;
 float minB = 0.3;
 float maxB = 1.0;
-float alpha = 0.03;
+float alpha = 0.04;
 float transStart = 0.35;
 float transWidth = 0.01;
 float transStart2 = 0.45;
@@ -14,10 +14,10 @@ float transWidth2 = 0.01;
 float radTransStart = 0.18;
 float radTransWidth = 0.15;
 
-float ah = 0.04;
+float ah = 0.02;
 float as = 0.055;
 float ab = 0.055;
-float af = 0.012;
+float af = 0.014;
 float ag = 1;
 
 float th = 0.060;
@@ -39,9 +39,9 @@ int[] pa;
 color[] P;
 
 float cr = 4;
-float hourWidth = 0.01;
+float hourWidth = 0.013;
 float hourLength = 0.2;
-float minuteWidth = 0.01;
+float minuteWidth = 0.013;
 float minuteLength = 0.25;
 float secondWidth = 0.01;
 float secondLength = 0.57;
@@ -123,12 +123,11 @@ void draw() {
         c = lerpColor( P[x+y*width/2], hsbColor(h*360, 1, b), alpha );
         pa[x+y*width/2] = 0;
       } else {
-        if ( pa[x+y*width/2] < 8 ) {
+        if ( pa[x+y*width/2] < 20 ) {
           c = lerpColor( P[x+y*width/2], color(0, 0, 0), alpha );
           pa[x+y*width/2]++;
         } else { 
           c = color( 0, 0, 0 );
-          
         }
       }
       P[x+y*width/2] = c;
@@ -151,15 +150,15 @@ void draw() {
   float minAng = TWO_PI * (float(minute())+float(second())/60)/60;
   float hourAng = TWO_PI * (float(hour()%12)+float(minute())/60)/12;
   translate( 0.5*xRes, 0.5*yRes );
-  stroke( 255, 255, 255, 64 );
+  stroke( 255, 255, 255, 128 );
   fill(0);
   float h = (frameCount*tc*tA + centerH + widthH*(-0.5+noise( 0.1*th*t ) ) )%1;
   color c = hsbColor( h*360, 0.5, 0.5) ;
-
-  strokeWeight(2);
+  
+  strokeWeight(1.5);
   float cr = 4;
-
   fill( red(c), green(c), blue(c), 196 );
+  
   pushMatrix();
   rotate( PI+minAng );
   rect( -0.5*minuteWidth*yRes, -backEnd*yRes, minuteWidth*yRes, minuteLength*yRes, cr, cr, cr, cr );
@@ -171,6 +170,7 @@ void draw() {
   rotate( PI+hourAng );
   rect( -0.5*hourWidth*yRes, -backEnd*yRes, hourWidth*yRes, hourLength*yRes, cr, cr, cr, cr );
   popMatrix();
+  //ellipse( 0 , 0 , 0.5*backEnd*yRes , 0.5*backEnd*yRes );
   noStroke();
 
 
