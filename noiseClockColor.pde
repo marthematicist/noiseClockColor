@@ -155,7 +155,7 @@ void draw() {
   float h = (frameCount*tc*tA + centerH + widthH*(-0.5+noise( 0.1*th*t ) ) )%1;
   color c = hsbColor( h*360, 0.5, 0.5) ;
   
-  strokeWeight(1.5);
+  strokeWeight(1.0);
   float cr = 4;
   fill( red(c), green(c), blue(c), 196 );
   
