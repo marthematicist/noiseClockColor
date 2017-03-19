@@ -34,7 +34,7 @@ int w = 1;
 float[] px;
 float[] py;
 float[] pf;
-float[] pa;
+int[] pa;
 
 color[] P;
 
@@ -53,7 +53,7 @@ int startSeconds;
 float xRes;
 float yRes;
 void setup() {
-  size( 800 , 480 );
+  size( 800, 480 );
   xRes = float(width);
   yRes = float(height);
   centerH = random(0, 1);
@@ -64,18 +64,18 @@ void setup() {
   startTime = millis();
   startSeconds = second();
   println(startSeconds);
-  
+
   P = new color[(width/2)*(height/2)];
   for ( int x = 0; x < width/2; x++ ) {
     for ( int y = 0; y < height/2; y++ ) {
-      P[x+y*width/2] = color(0,0,0);
+      P[x+y*width/2] = color(0, 0, 0);
     }
   }
-  
+
   px = new float[(width/2)*(height/2)];
   py = new float[(width/2)*(height/2)];
   pf = new float[(width/2)*(height/2)];
-  pa = new float[(width/2)*(height/2)];
+  pa = new int[(width/2)*(height/2)];
   for ( int x = 0; x < width/2; x++ ) {
     for ( int y = 0; y < height/2; y++ ) {
       float x2 = float(x) + 0.5;
@@ -88,19 +88,14 @@ void setup() {
       float r = v.mag();
       px[x+y*width/2] = r*cos(a);
       py[x+y*width/2] = r*sin(a);
-      if( r < radTransStart*yRes ) {
+      if ( r < radTransStart*yRes ) {
         pf[x+y*width/2] = 0;
       } else if  (r >= (radTransStart)*yRes && r < (radTransStart+radTransWidth)*yRes ) {
         pf[x+y*width/2] = (r-(radTransStart*yRes))/(radTransWidth*yRes);
       } else {
         pf[x+y*width/2] = 1;
       }
-      if( r < 1.1*minuteLength*yRes ) {
-        pa[x+y*width/2] = 0.05;
-      } else {
-        pa[x+y*width/2] = 1;
-      }
-      
+      pa[x+y*width/2] = 0;
     }
   }
 }
@@ -123,17 +118,24 @@ void draw() {
         float h = (frameCount*tc*tA + centerH + widthH*(-0.5+noise( ag*ah*(0*xRes + x2), ag*ah*y2, th*t ) ) )%1;
         //float s = lerp( minS, maxS, noise( ag*as*(10*xRes + x2), ag*as*(10*yRes + y2), ts*t ) );
         //float b = lerp( minB, maxB, noise( ag*ab*(20*xRes + x2), ag*ab*(20*yRes + y2), tb*t ) );
-        float b = lerp( minB , maxB , (f-transEnd)/(1-transEnd));
+        float b = lerp( minB, maxB, (f-transEnd)/(1-transEnd));
         c = lerpColor( P[x+y*width/2], hsbColor(h*360, 1, b), alpha );
+        pa[x+y*width/2] = 0;
       } else {
-        c = lerpColor( P[x+y*width/2], color(0, 0, 0 , pa[x+y*width/2]*255), alpha );
+        if ( pa[x+y*width/2] < 6 ) {
+          c = lerpColor( P[x+y*width/2], color(0, 0, 0), alpha );
+          pa[x+y*width/2]++;
+        } else { 
+          c = color( 0, 0, 0 );
+          
+        }
       }
       P[x+y*width/2] = c;
       pixels[ (width/2+x) + (height/2+y)*width ] = c;
       pixels[ (width/2+x) + (height/2-y)*width ] = c;
       pixels[ (width/2-x) + (height/2+y)*width ] = c;
       pixels[ (width/2-x) + (height/2-y)*width ] = c;
-      if( x < height/2 ) {
+      if ( x < height/2 ) {
         pixels[ (width/2+y) + (height/2+x)*width ] = c;
         pixels[ (width/2+y) + (height/2-x)*width ] = c;
         pixels[ (width/2-y) + (height/2+x)*width ] = c;
@@ -142,37 +144,36 @@ void draw() {
     }
   }
   updatePixels();
-  
+
   // clock stuff
   float secAng = TWO_PI * float(second())/60;
   float minAng = TWO_PI * (float(minute())+float(second())/60)/60;
   float hourAng = TWO_PI * (float(hour()%12)+float(minute())/60)/12;
-  translate( 0.5*xRes , 0.5*yRes );
-  stroke( 255 , 255 , 255 , 20 );
+  translate( 0.5*xRes, 0.5*yRes );
+  stroke( 255, 255, 255, 64 );
   fill(0);
   float h = (frameCount*tc*tA + centerH + widthH*(-0.5+noise( 0.1*th*t ) ) )%1;
-  color c = hsbColor( h*360 , 0.5, 0.5) ;
-  
-  strokeWeight(0.85);
+  color c = hsbColor( h*360, 0.5, 0.5) ;
+
+  strokeWeight(2);
   float cr = 4;
-  fill( red(c),green(c),blue(c),225 );
-  ellipse(0,0,0.03*yRes,0.03*yRes);
-  fill( red(c),green(c),blue(c),60 );
+
+  fill( red(c), green(c), blue(c), 196 );
   pushMatrix();
   rotate( PI+minAng );
-  rect( -0.5*minuteWidth*yRes , -backEnd*yRes , minuteWidth*yRes , minuteLength*yRes , cr , cr , cr , cr );
+  rect( -0.5*minuteWidth*yRes, -backEnd*yRes, minuteWidth*yRes, minuteLength*yRes, cr, cr, cr, cr );
   popMatrix();
   h = (frameCount*tc*tA + centerH + widthH*(-0.5+noise( -0.1*th*t ) ) )%1;
-  c = hsbColor( h*360 , 0.5, 0.5) ;
-  fill( red(c),green(c),blue(c),60 );
+  c = hsbColor( h*360, 0.5, 0.5) ;
+  fill( red(c), green(c), blue(c), 196 );
   pushMatrix();
   rotate( PI+hourAng );
-  rect( -0.5*hourWidth*yRes , -backEnd*yRes , hourWidth*yRes , hourLength*yRes , cr , cr , cr , cr );
+  rect( -0.5*hourWidth*yRes, -backEnd*yRes, hourWidth*yRes, hourLength*yRes, cr, cr, cr, cr );
   popMatrix();
   noStroke();
-  
 
-  if( frameCount%25 == 0 ) {
+
+  if ( frameCount%25 == 0 ) {
     println(frameRate);
   }
 }
@@ -192,22 +193,34 @@ color hsbColor( float h, float s, float b ) {
   float gp = 0;
   float bp = 0;
   if ( 0 <= h && h < 60 ) {
-    rp = c;  gp = x;  bp = 0;
+    rp = c;  
+    gp = x;  
+    bp = 0;
   }
   if ( 60 <= h && h < 120 ) {
-    rp = x;  gp = c;  bp = 0;
+    rp = x;  
+    gp = c;  
+    bp = 0;
   }
   if ( 120 <= h && h < 180 ) {
-    rp = 0;  gp = c;  bp = x;
+    rp = 0;  
+    gp = c;  
+    bp = x;
   }
   if ( 180 <= h && h < 240 ) {
-    rp = 0;  gp = x;  bp = c;
+    rp = 0;  
+    gp = x;  
+    bp = c;
   }
   if ( 240 <= h && h < 300 ) {
-    rp = x;  gp = 0;  bp = c;
+    rp = x;  
+    gp = 0;  
+    bp = c;
   }
   if ( 300 <= h && h < 360 ) {
-    rp = c;  gp = 0;  bp = x;
+    rp = c;  
+    gp = 0;  
+    bp = x;
   }
   return color( (rp+m)*255, (gp+m)*255, (bp+m)*255 );
 }
