@@ -14,7 +14,7 @@ float transWidth2 = 0.01;
 float radTransStart = 0.18;
 float radTransWidth = 0.15;
 
-float ah = 0.007;
+float ah = 0.04;
 float as = 0.055;
 float ab = 0.055;
 float af = 0.012;
@@ -178,7 +178,9 @@ void draw() {
   }
 }
 
-
+void mouseClicked() { 
+  exit();
+}
 
 void mouseMoved() {
 }
